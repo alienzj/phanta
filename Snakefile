@@ -11,7 +11,7 @@ def get_sample_reads(sample_file):
   paired_end = ''
   with open(sample_file, 'r') as sf:
     for line in sf:
-      print(line)
+      #print(line)
       line = line.rstrip('\n').split('\t')
       if len(line) == 1 or line[0] == 'Sample' or line[0] == '#Sample' or line[0].startswith('#'):
         continue

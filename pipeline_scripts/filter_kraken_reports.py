@@ -229,19 +229,35 @@ with open(out_fname, 'w') as outfile:
     # figure out based on superkingdom
     superkingdom = species_to_superkingdom[species]
 
-    if superkingdom == '2': # bacteria
+    # superkingdom
+    # Bacteria        609216830
+    # Archaea         439684927
+    # Bamfordvirae    57932934
+    # Heunggongvirae  1238430944
+    # Loebvirae       94436553
+    # Orthornavirae   104708768
+    # Pararnavirae    1921562045
+    # r__Monodnaviria_Unclassified    414168241
+    # r__Unclassified 1346054397
+    # Sangervirae     107962225
+    # Shotokuvirae    1793913686
+
+    #if superkingdom == '2': # bacteria
+    if superkingdom == '609216830': # bacteria
       if (max_cov >= max_cov_bacteria) and (max_minimizers >= max_minimizers_bacteria):
         species_to_keep.add(species)
 
-    elif superkingdom == '2157': # archaea
+    #elif superkingdom == '2157': # archaea
+    elif superkingdom == '439684927': # archaea
       if (max_cov >= max_cov_arc) and (max_minimizers >= max_minimizers_arc):
         species_to_keep.add(species)
 
-    elif superkingdom == '2759': # eukaryotes
-      if (max_cov >= max_cov_euk) and (max_minimizers >= max_minimizers_euk):
-        species_to_keep.add(species)
+    #elif superkingdom == '2759': # eukaryotes
+    #  if (max_cov >= max_cov_euk) and (max_minimizers >= max_minimizers_euk):
+    #    species_to_keep.add(species)
 
-    elif superkingdom == '10239': # viruses
+    #elif superkingdom == '10239': # viruses
+    elif superkingdom in ['57932934', '1238430944', '94436553', '104708768', '1921562045', '414168241', '1346054397', '107962225', '1793913686']: # viruses
       if (max_cov >= max_cov_virus) and (max_minimizers >= max_minimizers_virus):
         species_to_keep.add(species)
 
