@@ -353,14 +353,16 @@ rule deal_with_intermediate:
     classdir=join(outdir, "classification"),
     intdir=join(outdir, "classification/intermediate")
   shell: """
-    mkdir {params.intdir}
-    mv {params.classdir}/*krak {params.intdir}
-    mv {params.classdir}/*krak.report {params.intdir}
-    mv {params.classdir}/*krak.report.filtered {params.intdir}
-    mv {params.classdir}/*krak.report.filtered.bracken {params.intdir}
-    mv {params.classdir}/*krak.report.filtering_decisions.txt {params.intdir}
     if [[ {params.delete} == 'True' ]]; then
+      mkdir {params.intdir}
+      mv {params.classdir}/*krak {params.intdir}
+      mv {params.classdir}/*krak.report {params.intdir}
+      mv {params.classdir}/*krak.report.filtered {params.intdir}
+      mv {params.classdir}/*krak.report.filtered.bracken {params.intdir}
+      mv {params.classdir}/*krak.report.filtering_decisions.txt {params.intdir}
+
       rm -r {params.intdir}
     fi
+
     touch {output.completed}
     """
