@@ -52,9 +52,9 @@ sample_names = sample_reads.keys()
 # also determine whether gzipped
 # print(config['gzipped'] == True)
 if config['gzipped'] == True:
-   gzipped_string = '--gzip-compressed'
+  gzipped_string = '--gzip-compressed'
 else:
-   gzipped_string = ''
+  gzipped_string = ''
 
 # also read in desired confidence threshold for Kraken
 confidence_threshold = config['confidence_threshold']
@@ -106,8 +106,8 @@ rule filter_kraken:
   input:
     krak_report = join(outdir, "classification/{samp}.krak.report")
   output:
-    krak_species = temp(join(outdir, "classification/{samp}.krak.report.species")),
-    #krak_species_final = join(outdir, "classification/{samp}.krak.report.species.final"),
+    krak_strain = temp(join(outdir, "classification/{samp}.krak.report.strain")),
+    #krak_strain_final = join(outdir, "classification/{samp}.krak.report.strain.final"),
     krak_report_filtered = join(outdir, "classification/{samp}.krak.report.filtered"),
     filtering_decisions = join(outdir, "classification/{samp}.krak.report.filtering_decisions.txt")
   params:
@@ -126,10 +126,10 @@ rule filter_kraken:
     {params.cov_thresh_bacterial} {params.cov_thresh_viral} {params.minimizer_thresh_bacterial} \
     {params.minimizer_thresh_viral} \
     {params.cov_thresh_arc} {params.cov_thresh_euk} {params.minimizer_thresh_arc} \
-    {params.minimizer_thresh_euk} 
+    {params.minimizer_thresh_euk}
   """
 
-# need the below rule for protection against Bracken erroring if all species with
+# need the below rule for protection against Bracken erroring if all strain with
 # # >= thresh reads have been removed from the report
 rule process_filtered_kraken:
   input:
@@ -177,13 +177,13 @@ rule bracken:
     good_to_go = join(outdir, "processed_filtered_kraken/{samp}.txt")
   output:
     brack_report_1 = join(outdir, "classification/{samp}.krak.report.filtered.bracken"),
-    brack_report_2 = join(outdir, "classification/{samp}.krak.report_bracken_species.filtered")
+    brack_report_2 = join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered")
   params:
     db = config['database'],
     readlen = config['read_length'],
     threshold = config['filter_thresh'],
     possible_1 = join(outdir, "classification/{samp}.krak.report.filtered.bracken.temp"),
-    possible_2 = join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.temp")
+    possible_2 = join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered.temp")
   threads: 1
   resources:
     mem_mb = 8*1024,
@@ -195,7 +195,7 @@ rule bracken:
     cp {params.possible_2} {output.brack_report_2} ) \
     || bracken -d {params.db} -i {input.krak_report} \
     -o {output.brack_report_1} -r {params.readlen} \
-    -l 'S' -t {params.threshold}
+    -l 'S1' -t {params.threshold}
     """
 
 rule samples_failed_bracken: # make a list of samples that failed Bracken
@@ -220,10 +220,10 @@ rule samples_failed_bracken: # make a list of samples that failed Bracken
 
 rule prepare_to_merge_counts: # do this rule for each Bracken report individually
   input:
-    brack_report = join(outdir, "classification/{samp}.krak.report_bracken_species.filtered"),
+    brack_report = join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered"),
     failed_file = join(outdir, "classification/samples_that_failed_bracken.txt")
   output:
-    brack_to_merge = temp(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge"))
+    brack_to_merge = temp(join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered.to_merge"))
   params:
     repo_dir = config['pipeline_directory'],
     db = config['database']
@@ -237,7 +237,7 @@ rule prepare_to_merge_counts: # do this rule for each Bracken report individuall
 
 rule tot_reads_per_sample: # will need for normalization
   input:
-    brack_report = join(outdir, "classification/{samp}.krak.report_bracken_species.filtered")
+    brack_report = join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered")
   output:
     tot_reads_file = temp(join(outdir, "classification/{samp}_total_reads.txt"))
   params:
@@ -262,11 +262,11 @@ rule tot_reads_all: # aggregate outputs of the previous rule
 
 rule prepare_to_merge_normed: # normalized versions of to_merge files produced in an earlier rule
   input:
-    counts_files=expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge"), samp=sample_names),
+    counts_files=expand(join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered.to_merge"), samp=sample_names),
     tot_reads_file=join(outdir, "final_merged_outputs/total_reads.tsv"),
     failed_file = join(outdir, "classification/samples_that_failed_bracken.txt")
   output:
-    temp(expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge.norm_brack"), samp=sample_names))
+    temp(expand(join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered.to_merge.norm_brack"), samp=sample_names))
   params:
     repo_dir = config['pipeline_directory'],
     classdir=join(outdir, "classification"),
@@ -278,8 +278,8 @@ rule prepare_to_merge_normed: # normalized versions of to_merge files produced i
 
 rule merge_counts_normed: # make the 3 tables we want! :)
   input:
-    expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge"), samp=sample_names),
-    expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge.norm_brack"), samp=sample_names),
+    expand(join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered.to_merge"), samp=sample_names),
+    expand(join(outdir, "classification/{samp}.krak.report_bracken_S1.filtered.to_merge.norm_brack"), samp=sample_names),
     failed_file = join(outdir, "classification/samples_that_failed_bracken.txt")
   output:
     list1=temp(join(outdir, "classification/counts_tables.txt")),
@@ -297,7 +297,7 @@ rule merge_counts_normed: # make the 3 tables we want! :)
     {input.failed_file} {output.list1} {output.list2}
     """
 
-##### STEP SIX - Correct species abundances reported by Bracken for genome length.
+##### STEP SIX - Correct strain abundances reported by Bracken for genome length.
 
 rule scale_bracken:
   input:

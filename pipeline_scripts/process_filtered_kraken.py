@@ -23,21 +23,21 @@ with open(kraken_filtered, 'r') as infile:
   for line in infile:
     line = line.rstrip('\n').split('\t')
     rank, assigned = line[5], int(line[1])
-    if rank == 'S' and assigned >= threshold:
+    if rank == 'S1' and assigned >= threshold:
       bracken_will_fail = False
       break
 
 if bracken_will_fail:
 
-  # output an empty Bracken species report
+  # output an empty Bracken strain report
   with open(kraken_filtered + '.bracken.temp', 'w') as outfile:
     pass
 
   # output an empty Kraken-style Bracken report
-  out_fname = kraken_filtered[:kraken_filtered.rfind('.')] + '_bracken_species.filtered.temp'
+  out_fname = kraken_filtered[:kraken_filtered.rfind('.')] + '_bracken_strain.filtered.temp'
   with open(out_fname, 'w') as outfile:
     pass
 
-  # output an empty scaled Bracken species report
+  # output an empty scaled Bracken strain report
   with open(kraken_filtered + '.bracken.scaled.temp', 'w') as outfile:
     pass

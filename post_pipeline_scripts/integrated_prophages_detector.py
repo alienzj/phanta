@@ -100,27 +100,27 @@ with open(outf, 'w') as outfile:
 				fwd_class = fwd_end.split('\t')[2]
 				rev_class = rev_end.split('\t')[2]
 
-				# get species and superkingdom level classifications
-				fwd_species = taxid_to_desired_rank(fwd_class, 'species')
+				# get strain and superkingdom level classifications
+				fwd_strain = taxid_to_desired_rank(fwd_class, 'strain')
 				fwd_kingdom = taxid_to_desired_rank(fwd_class, 'superkingdom')
-				rev_species = taxid_to_desired_rank(rev_class, 'species')
+				rev_strain = taxid_to_desired_rank(rev_class, 'strain')
 				rev_kingdom = taxid_to_desired_rank(rev_class, 'superkingdom')
 
 				kingdoms = {fwd_kingdom, rev_kingdom}
 				if len(kingdoms) > 1:
 					# scenario 1 - viral forward read, bacterial reverse read
-					if (fwd_kingdom == '10239') and ('error' not in fwd_species) \
-					and (rev_kingdom == '2') and ('error' not in rev_species):
+					if (fwd_kingdom == '10239') and ('error' not in fwd_strain) \
+					and (rev_kingdom == '2') and ('error' not in rev_strain):
 						# record this info
-						viral_contender = fwd_species
-						bacterial_contender = rev_species
+						viral_contender = fwd_strain
+						bacterial_contender = rev_strain
 
 					# scenario 2 - viral reverse read, bacterial forward read
-					if (rev_kingdom == '10239') and ('error' not in rev_species) \
-					and (fwd_kingdom == '2') and ('error' not in fwd_species):
+					if (rev_kingdom == '10239') and ('error' not in rev_strain) \
+					and (fwd_kingdom == '2') and ('error' not in fwd_strain):
 						# record this info
-						viral_contender = rev_species
-						bacterial_contender = fwd_species
+						viral_contender = rev_strain
+						bacterial_contender = fwd_strain
 
 					if viral_contender and bacterial_contender:
 						# figure out whether we care about this virus-bac pair,

@@ -22,7 +22,7 @@ with open(failed, 'r') as infile:
 
 for samp in sample_names:
   # file to normalize
-  counts_table = indir + '/' + samp + '.krak.report_bracken_species.filtered.to_merge'
+  counts_table = indir + '/' + samp + '.krak.report_bracken_S1.filtered.to_merge'
 
   # file to produce
   outf = counts_table + '.norm_brack'

@@ -1,6 +1,6 @@
 # command line arguments
 # 1) the original merged output to pare down
-# 2) the desired rank (e.g., genus, species)
+# 2) the desired rank (e.g., genus, strain)
 
 import sys
 

@@ -5,7 +5,7 @@ db, merged_table, output, desired_rank = \
 sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 
 # go through each line in the merged table and figure out whether
-# this species has info specified for the desired rank
+# this strain has info specified for the desired rank
 # if so, cut both versions of the ID down to the desired rank
 
 # add to a dict of dicts
@@ -25,7 +25,7 @@ with open(merged_table, 'r') as infile:
     line=line.rstrip('\n').split('\t')
     id_names, id_taxids = line[0], line[1]
     if "|"+desired_rank in id_names:
-   
+
       # then we care about this line!
 
       # cut id_names and id_taxids down to just the desired rank

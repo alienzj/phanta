@@ -7,23 +7,23 @@ import sys
 def main():
     #input###
     input_counts = sys.argv[1] #merged counts
-    host_file = sys.argv[2] # microbial host per species level taxonomy
+    host_file = sys.argv[2] # microbial host per strain level taxonomy
     out = sys.argv[3]
     #reading inputs
     profile = pd.read_csv(input_counts, sep="\t")
     host_prediction = pd.read_csv(host_file, sep="\t")
-    #filteing-in only viral species
-    profile_viral_species = profile[(profile.Taxon_Lineage_with_Names.str.contains("superkingdom_Viruses")) & (profile.Taxon_Lineage_with_Names.str.contains("species"))]
-    if profile_viral_species.empty:
+    #filteing-in only viral strain
+    profile_viral_strain = profile[(profile.Taxon_Lineage_with_Names.str.contains("superkingdom_Viruses")) & (profile.Taxon_Lineage_with_Names.str.contains("strain"))]
+    if profile_viral_strain.empty:
         header = "Taxon," + ",".join(profile.columns[2:])
         with open(out, "w") as outf:
-            sys.stderr.write("No viral species present; exiting\n")
+            sys.stderr.write("No viral strain present; exiting\n")
             outf.write(header + "\n")
         sys.exit()
-    #merging dataframes by species taxonomy id
-    species_taxa = profile_viral_species.Taxon_Lineage_with_IDs.str.split("_").str[-1]
-    profile_viral_species.insert(loc=2, column='species_taxonomy', value=species_taxa.astype(int))
-    profile_with_host = pd.merge(profile_viral_species, host_prediction, how='left', right_on='species_taxa', left_on='species_taxonomy')
+    #merging dataframes by strain taxonomy id
+    strain_taxa = profile_viral_strain.Taxon_Lineage_with_IDs.str.split("_").str[-1]
+    profile_viral_strain.insert(loc=2, column='strain_taxonomy', value=strain_taxa.astype(int))
+    profile_with_host = pd.merge(profile_viral_strain, host_prediction, how='left', right_on='strain_taxa', left_on='strain_taxonomy')
     #sum counts/abundance per level
     profile_with_host['Host genus'].fillna("d__Unknown;p__Unknown;c__Unknown;o__Unknown;f__Unknown;g__unknown", inplace=True)
     profile_with_host['domain'] = profile_with_host['Host genus'].str.split(";").str[0:1].str.join(";")
@@ -32,7 +32,7 @@ def main():
     profile_with_host['order'] = profile_with_host['Host genus'].str.split(";").str[0:4].str.join(";")
     profile_with_host['family'] = profile_with_host['Host genus'].str.split(";").str[0:5].str.join(";")
     profile_with_host['genus'] = profile_with_host['Host genus'].str.split(";").str[0:6].str.join(";")
-    profile_with_host.drop(columns=['species_taxonomy', 'species_taxa'], inplace=True)
+    profile_with_host.drop(columns=['strain_taxonomy', 'strain_taxa'], inplace=True)
     #creating out file
     d = profile_with_host.groupby('domain').sum()
     p = profile_with_host.groupby('phylum').sum()
