@@ -37,7 +37,7 @@ def merge_tables(table_files, workers, **kwargs):
     df_all = pd.concat(dfs, axis=1).fillna(0).reset_index()
 
     if "output" in kwargs:
-        df.to_csv(kwargs["output"], sep="\t", index=False)
+        df_all.to_csv(kwargs["output"], sep="\t", index=False)
     return df_all
 
 
