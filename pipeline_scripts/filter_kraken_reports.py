@@ -252,8 +252,42 @@ with open(out_fname, 'w') as outfile:
     # Phixviricota    107962225
     # Uroviricota     1238430944
 
+# updated at 2023-10-19
+    #if superkingdom == '2': # bacteria
+    if superkingdom == '609216830': # bacteria
+      if (max_cov >= max_cov_bacteria) and (max_minimizers >= max_minimizers_bacteria):
+        species_to_keep.add(species)
+
+    #elif superkingdom == '2157': # archaea
+    elif superkingdom == '439684927': # archaea
+      if (max_cov >= max_cov_arc) and (max_minimizers >= max_minimizers_arc):
+        species_to_keep.add(species)
+
+    #elif superkingdom == '2759': # eukaryotes
+    #  if (max_cov >= max_cov_euk) and (max_minimizers >= max_minimizers_euk):
+    #    species_to_keep.add(species)
+
+    # Cressdnaviricota        1793913686
+    # Hofneiviricota  94436553
+    # k__r__Monodnaviria_Unclassified 414168241
+    # k__r__n__Viruses_Unclassified   1516388935
+    # k__r__Realm_Unclassified        61546590
+    # Nucleocytoviricota      57932934
+    # Phixviricota    107962225
+    # Uroviricota     1238430944
+
+# updated at 2023-10-19
+#Archaea {439684927.0}
+#Bacteria    {609216830.0}
+#Bamfordvirae    {57932934.0}
+#Heunggongvirae  {1238430944.0}
+#Loebvirae   {94436553.0}
+#Sangervirae {107962225.0}
+#Shotokuvirae    {1793913686.0}
+
     #elif superkingdom == '10239': # viruses
-    if superkingdom in [ "107962225", "1238430944", "1516388935", "1793913686", "414168241", "57932934", "61546590", "94436553"]:
+    #if superkingdom in [ "107962225", "1238430944", "1516388935", "1793913686", "414168241", "57932934", "61546590", "94436553"]:
+    if superkingdom in [ "107962225", "1238430944", "1793913686", "57932934", "94436553"]:
       if (max_cov >= max_cov_virus) and (max_minimizers >= max_minimizers_virus):
         species_to_keep.add(species)
 
