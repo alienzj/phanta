@@ -68,8 +68,8 @@ def main():
 
     #creating out file
     taxon = pd.concat([d, p, c, o, f, g])
-    if taxon.iloc[1].dtype=='float': #normalize to 1 if relative abundance was given
-        taxon = pd.concat([d/d.sum() , p/p.sum(), c/c.sum() , o/o.sum(), f/f.sum(), g/g.sum()])
+    #if taxon.iloc[1].dtype=='float': #normalize to 1 if relative abundance was given
+    #    taxon = pd.concat([d/d.sum() , p/p.sum(), c/c.sum() , o/o.sum(), f/f.sum(), g/g.sum()])
 
     #taxon.index.name = "Taxon"
     taxon.to_csv(out, index=False)

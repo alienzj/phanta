@@ -106,7 +106,7 @@ rule filter_kraken:
   input:
     krak_report = join(outdir, "classification/{samp}.krak.report")
   output:
-    krak_species = temp(join(outdir, "classification/{samp}.krak.report.species")),
+    krak_species = join(outdir, "classification/{samp}.krak.report.species"),
     #krak_species_final = join(outdir, "classification/{samp}.krak.report.species.final"),
     krak_report_filtered = join(outdir, "classification/{samp}.krak.report.filtered"),
     filtering_decisions = join(outdir, "classification/{samp}.krak.report.filtering_decisions.txt")
@@ -135,7 +135,7 @@ rule process_filtered_kraken:
   input:
     krak_report_filtered = join(outdir, "classification/{samp}.krak.report.filtered")
   output:
-    completed = temp(join(outdir, "processed_filtered_kraken/{samp}.txt")),
+    completed = join(outdir, "processed_filtered_kraken/{samp}.txt"),
   params:
     repo_dir = config['pipeline_directory'],
     threshold = config['filter_thresh'],
@@ -223,7 +223,7 @@ rule prepare_to_merge_counts: # do this rule for each Bracken report individuall
     brack_report = join(outdir, "classification/{samp}.krak.report_bracken_species.filtered"),
     failed_file = join(outdir, "classification/samples_that_failed_bracken.txt")
   output:
-    brack_to_merge = temp(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge"))
+    brack_to_merge = join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge")
   params:
     repo_dir = config['pipeline_directory'],
     db = config['database']
@@ -239,7 +239,7 @@ rule tot_reads_per_sample: # will need for normalization
   input:
     brack_report = join(outdir, "classification/{samp}.krak.report_bracken_species.filtered")
   output:
-    tot_reads_file = temp(join(outdir, "classification/{samp}_total_reads.txt"))
+    tot_reads_file = join(outdir, "classification/{samp}_total_reads.txt")
   params:
     repo_dir = config['pipeline_directory'],
     krak_brack_dir = join(outdir, "classification")
@@ -252,9 +252,9 @@ rule tot_reads_all: # aggregate outputs of the previous rule
   input:
     expand(join(outdir, "classification/{samp}_total_reads.txt"), samp=sample_names)
   output:
-    outf=join(outdir, "final_merged_outputs/total_reads.tsv")
+    outf = join(outdir, "final_merged_outputs/total_reads.tsv")
   params:
-    classdir=join(outdir, "classification")
+    classdir = join(outdir, "classification")
   shell: """
     echo -e 'Samp_Name\tTot_Samp_Reads\tUnassigned_Step_One\tAssigned_Step_Three\tUnassigned_Step_Three' > {output.outf}
     cat {params.classdir}/*total_reads.txt >> {output.outf}
@@ -262,11 +262,11 @@ rule tot_reads_all: # aggregate outputs of the previous rule
 
 rule prepare_to_merge_normed: # normalized versions of to_merge files produced in an earlier rule
   input:
-    counts_files=expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge"), samp=sample_names),
-    tot_reads_file=join(outdir, "final_merged_outputs/total_reads.tsv"),
+    counts_files = expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge"), samp=sample_names),
+    tot_reads_file = join(outdir, "final_merged_outputs/total_reads.tsv"),
     failed_file = join(outdir, "classification/samples_that_failed_bracken.txt")
   output:
-    temp(expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge.norm_brack"), samp=sample_names))
+    expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge.norm_brack"), samp=sample_names)
   params:
     repo_dir = config['pipeline_directory'],
     classdir=join(outdir, "classification"),
@@ -278,23 +278,24 @@ rule prepare_to_merge_normed: # normalized versions of to_merge files produced i
 
 rule merge_counts_normed: # make the 3 tables we want! :)
   input:
-    expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge"), samp=sample_names),
-    expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge.norm_brack"), samp=sample_names),
-    failed_file = join(outdir, "classification/samples_that_failed_bracken.txt")
+    to_merge_list = expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge"), samp=sample_names),
+    to_merge_norm_list = expand(join(outdir, "classification/{samp}.krak.report_bracken_species.filtered.to_merge.norm_brack"), samp=sample_names)
   output:
-    list1=temp(join(outdir, "classification/counts_tables.txt")),
-    list2=temp(join(outdir, "classification/norm_brack_tables.txt")),
     counts=join(outdir, "final_merged_outputs/counts.txt"),
     norm_brack=join(outdir, "final_merged_outputs/relative_read_abundance.txt")
   params:
-    repo_dir = config['pipeline_directory'],
-    classdir=join(outdir, "classification"),
-    finaldir=join(outdir, "final_merged_outputs")
+    repo_dir = config['pipeline_directory']
+  threads: config['class_threads']
   shell: """
-    ls {params.classdir}/*to_merge | rev | cut -d'/' -f 1 | rev > {params.classdir}/counts_tables.txt
-    ls {params.classdir}/*norm_brack | rev | cut -d'/' -f 1 | rev > {params.classdir}/norm_brack_tables.txt
-    Rscript {params.repo_dir}/pipeline_scripts/merging_bracken_tables.R {params.classdir} {params.finaldir} \
-    {input.failed_file} {output.list1} {output.list2}
+    python {params.repo_dir}/pipeline_scripts/merge.py \
+    --threads {threads} \
+    --input-file {input.to_merge_list} \
+    --output-file {output.counts}
+
+    python {params.repo_dir}/pipeline_scripts/merge.py \
+    --threads {threads} \
+    --input-file {input.to_merge_norm_list} \
+    --output-file {output.norm_brack}
     """
 
 ##### STEP SIX - Correct species abundances reported by Bracken for genome length.
@@ -321,21 +322,19 @@ rule scale_bracken:
 
 rule merge_scaled_bracken:
   input:
-    expand(join(outdir, "classification/{samp}.krak.report.filtered.bracken.scaled"), samp=sample_names),
-    failed_file = join(outdir, "classification/samples_that_failed_bracken.txt")
+    to_merge_list = expand(join(outdir, "classification/{samp}.krak.report.filtered.bracken.scaled"), samp=sample_names)
   output:
-    list=temp(join(outdir, "classification/scaled_reports.txt")),
-    merged_temp=temp(join(outdir, "classification/relative_taxonomic_abundance_temp.txt")),
     merged_final=join(outdir, "final_merged_outputs/relative_taxonomic_abundance.txt")
   params:
     repo_dir = config['pipeline_directory'],
-    classdir=join(outdir, "classification"),
-    finaldir=join(outdir, "final_merged_outputs"),
     db=config['database']
+  threads: config['class_threads']
   shell: """
-    ls {params.classdir}/*scaled | rev | cut -d'/' -f 1 | rev > {params.classdir}/scaled_reports.txt
-    Rscript {params.repo_dir}/pipeline_scripts/merging_scaled_bracken.R {params.classdir} {output.list} {input.failed_file}
-    python {params.repo_dir}/pipeline_scripts/merging_scaled_bracken.py {params.db} {output.merged_temp} {params.finaldir}
+    python {params.repo_dir}/pipeline_scripts/merging_scaled_bracken.py \
+    --db {params.db} \
+    --threads {threads} \
+    --input-file {input.to_merge_list} \
+    --output-file {output.merged_final}
     """
 
 ##### STEP SEVEN - Move and/or delete certain "intermediate" files.
