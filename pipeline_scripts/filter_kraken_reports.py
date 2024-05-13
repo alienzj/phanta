@@ -229,21 +229,22 @@ with open(out_fname, 'w') as outfile:
     # figure out based on superkingdom
     superkingdom = species_to_superkingdom[species]
 
-    if superkingdom == '2': # bacteria
-      if (max_cov >= max_cov_bacteria) and (max_minimizers >= max_minimizers_bacteria):
-        species_to_keep.add(species)
+    #if superkingdom == '2': # bacteria
+    #  if (max_cov >= max_cov_bacteria) and (max_minimizers >= max_minimizers_bacteria):
+    #    species_to_keep.add(species)
 
-    elif superkingdom == '2157': # archaea
-      if (max_cov >= max_cov_arc) and (max_minimizers >= max_minimizers_arc):
-        species_to_keep.add(species)
+    #elif superkingdom == '2157': # archaea
+    #  if (max_cov >= max_cov_arc) and (max_minimizers >= max_minimizers_arc):
+    #    species_to_keep.add(species)
 
-    elif superkingdom == '2759': # eukaryotes
+    #elif superkingdom == '300941100': # eukaryotes
+    if superkingdom == '300941100': # eukaryotes
       if (max_cov >= max_cov_euk) and (max_minimizers >= max_minimizers_euk):
         species_to_keep.add(species)
 
-    elif superkingdom == '10239': # viruses
-      if (max_cov >= max_cov_virus) and (max_minimizers >= max_minimizers_virus):
-        species_to_keep.add(species)
+    #elif superkingdom == '10239': # viruses
+    #  if (max_cov >= max_cov_virus) and (max_minimizers >= max_minimizers_virus):
+    #    species_to_keep.add(species)
 
     else:
       species_to_keep.add(species)

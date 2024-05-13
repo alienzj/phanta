@@ -15,9 +15,12 @@ def main():
     ##step two- reading files to DFs
     bracken_df = pd.read_csv(bracken_report, sep="\t")
     bracken_df['taxonomy_id'] = bracken_df['taxonomy_id'].astype('str')
+
     kraken_df = pd.read_csv(kraken_filtering_decisions, sep="\t")
     kraken_df['species_taxid'] = kraken_df['species_taxid'].astype('str')
+
     length_df = pd.read_csv(genome_length_path, sep="\t")
+    length_df['species_level_taxa'] = length_df['species_level_taxa'].astype('str')
 
     ##step 3- calculating stats
     tmp_merged_df = pd.merge(bracken_df,length_df[['species_level_taxa','max','mean','median']], left_on='taxonomy_id', right_on='species_level_taxa')
